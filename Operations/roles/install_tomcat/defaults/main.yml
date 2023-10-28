@@ -1,0 +1,10 @@
+---
+user_name: tomcat
+group_name: tomcat
+user_shell: /bin/false
+home_dir: /opt/tomcat 
+major_version: 10
+minor_version: 10.1.14
+tomcat_url: "https://dlcdn.apache.org/tomcat/tomcat-{{ major_version }}/v{{ minor_version }}/bin/apache-tomcat-{{ minor_version }}.tar.gz"
+java_version: 11
+service_file_path: /etc/systemd/system/tomcat.service

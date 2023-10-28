@@ -1,0 +1,16 @@
+---
+- name: Create Symlink
+  file:
+    src: "{{ home_dir }}/apache-tomcat-{{ minor_version }}"
+    dest: "{{ home_dir }}/latest"
+    owner: "{{ user_name }}"
+    group: "{{ group_name }}"
+    mode: '0755'
+    state: link 
+- name: Restart Tomcat 
+  systemd:  
+    name: "{{ user_name }}"
+    daemon_reload: yes
+    enabled: yes
+    state: started
+  

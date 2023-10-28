@@ -1,0 +1,70 @@
+---
+- name: Check OS For Tomcat
+  debug: 
+    msg: 
+      - Validate OS For Tomcat 
+      - Install Java 11 using package
+- name: Validate OS compatibility 
+  fail: 
+    msg: Only install on Debian OS 
+  when: ansible_facts["os_family"] == 'RedHat'
+- name: Install Java 11 in Debian
+  apt: 
+    name: openjdk-{{ java_version }}-jdk 
+    update_cache: yes 
+    state: present 
+- name: Create Group for Tomcat 
+  group: 
+    name: "{{ group_name }}"
+    state: present
+- name: Create User Tomcat 
+  user: 
+    name: "{{ user_name }}"
+    group: "{{ group_name }}"
+    create_home: yes
+    home: "{{ home_dir }}"
+    shell: "{{ user_shell }}"
+- name: Create Home Dir for Tomcat
+  file: 
+    path: "{{ home_dir }}"
+    owner: "{{ user_name }}"
+    group: "{{ group_name }}"
+    mode: '0755'
+    state: directory  
+- name: Download Tomcat and Extract 
+  unarchive: 
+    src: "{{ tomcat_url }}"
+    creates: "{{ home_dir }}/apache-tomcat-{{ minor_version }}"
+    dest: "{{ home_dir }}"
+    remote_src: yes
+    owner: "{{ user_name }}"
+    group: "{{ group_name }}"
+    mode: '0755'
+  notify: Create Symlink
+- name: Create Symlink if Download Tomcat
+  meta: flush_handlers
+- name: copy tomcat service file 
+  template:
+    src: tomcat.j2
+    dest: "{{ service_file_path }}"
+- name: List executable files in tomcat bin files 
+  command: sudo sh -c 'ls /opt/tomcat/latest/bin/*.sh'
+  register: shell_files
+- name: Print executable files 
+  debug: 
+    var: shell_files
+- name: Give executable permission to .sh files in tomcat bin
+  file: 
+    path: "{{ item }}"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0751'
+  loop: "{{ shell_files.stdout_lines }}"
+- name: Start Tomcat service 
+  systemd: 
+    name: "{{ user_name }}"
+    daemon_reload: yes
+    enabled: yes
+    state: started
+  notify: 
+    - Restart Tomcat

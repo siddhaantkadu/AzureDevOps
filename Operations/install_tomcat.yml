@@ -1,0 +1,5 @@
+---
+- hosts: appserver
+  roles: 
+    - role: 'roles/install_tomcat'
+      become: yes
