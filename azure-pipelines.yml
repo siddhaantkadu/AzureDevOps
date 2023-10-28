@@ -1,0 +1,7 @@
+pool: default
+
+steps: 
+  - script: |
+      cd devops_qt/AzureDevOps/Operations
+      ansible-playbook -i hosts install_tomcat.yml
+    displayName: 'Install Tomcat on Ubuntu' 
